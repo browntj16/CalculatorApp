@@ -11,7 +11,12 @@ package com.mycompany.calculatorapp;
 public class CalculatorApp {
 
     public static void main(String[] args) {
-        // this .java file does nothing
-        System.out.println("Hello World!");
+        int until = 10;
+        for(int i = 0; i<until; i++){
+            if(i == 5){
+                until = 7;
+            }
+            System.out.println(i);
+        }
     }
 }

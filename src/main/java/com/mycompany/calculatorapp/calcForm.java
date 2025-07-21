@@ -307,14 +307,30 @@ public class calcForm extends javax.swing.JFrame {
         curr = curr + a;
         setText(curr);
     }
+    /**
+     * appends string to the text, but removes the last character first. I only use this to add 1 character
+     * at a time typically so this replaces the last character when used
+     * 
+     * @param a
+     * a is the new character we are appending to the string
+     */
     private void alterTextAreaReplace(String a){
         String curr = getText();
         curr = curr.substring(0, curr.length()-1) + a;
         setText(curr);
     }
+    /**
+     * Takes the equation the user made and makes heads and tails of it. Essentially, we take the string and put it into
+     * an array list so we can separate operations from numbers. We pass once to remove all multiplication and division from the equation,
+     * then we pass through the list again for addition and subtraction. Once both are done, we should have a list of size 1, so we return
+     * the first element from the list.
+     * @param command
+     * @return 
+     */
     private String parseCommand(String command){
         String num = "";
         ArrayList<String> list = new ArrayList<String>();
+        //this loops through the text and splits each member into elements of an arraylist
        for(int i = 0; i < command.length(); i++){
            String curr = Character.toString(command.charAt(i));
            if(conditionalHelper(curr)){
@@ -326,36 +342,111 @@ public class calcForm extends javax.swing.JFrame {
                num = num + curr;
            }
        }
-       if(!num.equals("")){
+       if(!num.equals("")){ //grabs last number (if there was one)
            list.add(num);
        }
        
-       
+       // this only works because of how I designed the calculator
+       // successful equations work like: "number, operation, number"
+       // this means that successful equations will always be of odd length in our list
+       // I don't know if this would scale up as the calculator had more operations added
        if(list.size()%2 == 0){
            error = true;
            return "Error!";
        }
-       int productCount = 0;
-       int sumCount = 0;
-       for(String i : list){
-           if(i.equals("x") || i.equals("/")){
-               productCount++;
-           }
-           else if(i.equals("+") || i.equals("-")){
-               sumCount++;
+       
+       //starts here
+       int size = list.size();
+       // there are two seperate for loops because of order of operations (like, how math equations work)
+       for(int i = 0; i < size; i++){
+           String element = list.get(i);
+           switch(element){ 
+               case "x":
+                   switchCaseHelper(list, i, "x");
+                   size = list.size();
+                   i--;
+                   break;
+               case "/":
+                   switchCaseHelper(list, i, "/");
+                   size = list.size();
+                   i--;
+                   break;
            }
        }
-       return ""; 
+       for(int i = 0; i < size; i++){
+           String element = list.get(i);
+           switch(element){ 
+               case "+":
+                   switchCaseHelper(list, i, "+");
+                   size = list.size();
+                   i--;
+                   break;
+               case "-":
+                   switchCaseHelper(list, i, "-");
+                   size = list.size();
+                   i--;
+                   break;
+           }
+       }
+       return list.get(0); 
     }
+    /**
+     * generic-ish code that I use for each case of the switch/case in parseCommand. basically, we grab the number on each
+     * side of the operation, perform the operation, then update the equation with the new product/sum
+     * @param list
+     * @param i
+     * @param operation 
+     */
+    private void switchCaseHelper(ArrayList<String> list, int i, String operation){
+        double leftNum = Double.parseDouble(list.get(i-1));
+        double rightNum = Double.parseDouble(list.get(i+1));
+        list.remove(i);
+        list.remove(i);
+        switch(operation){
+            case "+":
+                list.set(i-1, (String.valueOf(leftNum + rightNum)));
+                break;
+            case "-":
+                list.set(i-1, (String.valueOf(leftNum - rightNum)));
+                break;
+            case "x":
+                list.set(i-1, (String.valueOf(leftNum * rightNum)));
+                break;
+            case "/":
+                list.set(i-1, (String.valueOf(leftNum / rightNum)));
+                break;
+        }
+        
+    }
+    /**
+     * simple getter for the text where the equations are put
+     * @return 
+     */
     private String getText(){
         return numberText.getText();
     }
+    /**
+     * simple setter for the text area where the equations are
+     * @param inp 
+     */
     private void setText(String inp){
         numberText.setText(inp);
     }
+    /**
+     * found myself writing this if statement way too often
+     * @param inp
+     * @return 
+     */
     private boolean conditionalHelper(String inp){
         return (inp.equals("-") || inp.equals("+") || inp.equals("/") || inp.equals("x"));
     }
+    /**
+     * we use this for every event handler for the operation buttons (+, -, *, /)
+     * basically, if there was an error, we clear that text from the text area first, and then remove the error state. 
+     * we append an operation to the string iff the text area is empty and the last button they clicked was not an operation. if the
+     * last button they clicked was an operation, we remove it then append.
+     * @param operation 
+     */
     private void operationHelper(String operation){
         if(error){
             setText("");
@@ -371,6 +462,11 @@ public class calcForm extends javax.swing.JFrame {
            charLastClicked = operation;
        }
     }
+    /**
+     * same as the above one, but for the numbers. if there was an error state, we remove that from the text area then
+     * set error to false. then we just append whatever they clicked.
+     * @param inp 
+     */
     private void numKeyHelper(String inp){
         if(error){
            setText("");
@@ -379,6 +475,10 @@ public class calcForm extends javax.swing.JFrame {
         alterTextArea(inp);
         charLastClicked = inp;
     }
+    /**
+     * all of the number event handlers perform the same. see numKeyHelper for elaboration. 
+     * @param evt 
+     */
     private void oneButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_oneButtonActionPerformed
         numKeyHelper("1");
     }//GEN-LAST:event_oneButtonActionPerformed
