@@ -1,3 +1,5 @@
+# Basic Calculator GUI
+
 Basic calculator app I wrote while learning Swing. This time around, I used the NetBeans IDE to build and design the GUI. When searching the web for Swing tutorials, it seemed that most of them were using this IDE to make their GUI. It also seemed far easier than writing
 components individually so I decided to give it a whirl. 
 
